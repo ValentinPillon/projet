@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - interactive cubes</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				font-family: Monospace;
+				margin: 0px;
+			}
+		</style>
+	</head>
+	<body>
+    
+		<div id="container"></div>
+
+		<script src="http://mrdoob.github.com/three.js/build/three.min.js"></script>
+		<script type="text/javascript">
+		<!-- C'est ici que nous utiliserons Three.js -->
+			var renderer, scene, camera, mesh;
+			
+			var raycaster = new THREE.Raycaster();
+			var mouse = new THREE.Vector2(), INTERSECTED;
+			
+			init();
+			animate();
+
+			var geometry2 = new THREE.SphereBufferGeometry( 500, 60, 40 );
+			// invert the geometry on the x-axis so that all of the faces point inward
+			geometry2.scale( -1, 1, 1 );
+			
+			function init()
+			{
+				
+				var containeur = document.getElementById('container');				
+				// on initialise le moteur de rendu
+				renderer = new THREE.WebGLRenderer();
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				containeur.appendChild(renderer.domElement);
+
+				// on initialise la scène
+				scene = new THREE.Scene();
+				scene.background = new THREE.Color( 0xf0f0f0 );
+
+				// on initialise la camera que l’on place ensuite sur la scène
+				camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000 );
+				camera.target = new THREE.Vector3( 0, 0, 0 );
+								
+			
+				
+				//var light = new THREE.DirectionalLight( 0xffffff, 1 );
+				//light.position.set( 1, 1, 1 ).normalize();
+				//scene.add( light );
+				
+				//var texture = new THREE.TextureLoader().load( 'image/banner.jfif' );
+				//var material; new THREE.MeshBasicMaterial( { map: texture } );
+				//mesh.material.map = THREE.ImageUtils.loadTexture( 'image/banner2.jpeg' );new THREE.MeshBasicMaterial( { map: texture,overdraw: 0.5 } );	
+				mesh = new THREE.Mesh( geometry2, material );
+				scene.add( mesh );
+				
+				var geometry = new THREE.BoxBufferGeometry( 20, 20, 20 );
+				
+				for ( var i = 0; i < 100; i ++ ) {
+
+					var object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
+
+					object.position.x = Math.random() * 800 - 400;
+					object.position.y = Math.random() * 800 - 400;
+					object.position.z = Math.random() * 800 - 400;
+					//object.name = button.i;
+
+					//object.rotation.x = Math.random() * 2 * Math.PI;
+					//object.rotation.y = Math.random() * 2 * Math.PI;
+					//object.rotation.z = Math.random() * 2 * Math.PI;
+
+					//object.scale.x = Math.random() + 0.5;
+					//object.scale.y = Math.random() + 0.5;
+					//object.scale.z = Math.random() + 0.5;
+
+					scene.add( object );
+
+				}
+				
+				window.addEventListener( 'mousemove', onMouseMove, false );
+				
+			}
+			
+			function onMouseMove( event ) 
+			{
+
+				// calculate mouse position in normalized device coordinates
+				// (-1 to +1) for both components
+
+				mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+				mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+			}
+			
+			function animate() 
+			{
+
+				requestAnimationFrame( animate );
+
+				render();
+				
+
+			}
+			function render() 
+			{
+			
+				//Mise a jour déplacement verticale
+				//lat = Math.max( - 85, Math.min( 85, lat ) );
+				//phi = THREE.Math.degToRad( 90 - lat );
+				//theta = THREE.Math.degToRad( lon );
+				
+				//camera.target.x = 500 * Math.sin( phi ) * Math.cos( theta );
+				//camera.target.y = 500 * Math.cos( phi );
+				//camera.target.z = 500 * Math.sin( phi ) * Math.sin( theta );
+				
+				//Mets a jour l'affichage de la camera
+				//camera.lookAt( camera.target )
+				
+				raycaster.setFromCamera( mouse, camera );
+
+				var intersects = raycaster.intersectObjects( scene.children );
+
+				if ( intersects.length > 0 ) {
+
+					if ( INTERSECTED != intersects[ 0 ].object ) {
+
+						if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+
+						INTERSECTED = intersects[ 0 ].object;
+						INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+						INTERSECTED.material.emissive.setHex( 0xff0000 );
+
+					}
+
+				} else {
+
+					if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+
+					INTERSECTED = null;
+
+				}
+
+				renderer.render( scene, camera );
+
+			}
+		</script>
+	</body>
+</html>
